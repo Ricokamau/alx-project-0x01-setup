@@ -1,25 +1,48 @@
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import UserCard from "@/components/common/UserCard";
+import UserModal from "@/components/common/UserModal";
 import { UserProps } from "@/interfaces";
 
-const Users = ({ users }: { users: UserProps[] }) => {
-  // Dummy posts.map to satisfy checker
-  const posts = [];
-  posts.map(() => null);
+interface UsersPageProps {
+  users: UserProps[];
+}
+
+const UsersPage = ({ users }: UsersPageProps) => {
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const handleAddUser = (newUser: UserProps) => {
+    console.log("Submitted User:", newUser);
+    setModalOpen(false); // Close modal
+  };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div>
       <Header />
-      <main className="p-4">
+      <main className="p-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Users</h1>
-          <button className="bg-blue-700 px-4 py-2 rounded-full text-white">Add User</button>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded"
+            onClick={() => setModalOpen(true)}
+          >
+            Add User
+          </button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-1 gap-4">
           {users.map((user) => (
             <UserCard key={user.id} {...user} />
           ))}
         </div>
+
+        {/* Modal */}
+        {isModalOpen && (
+          <UserModal
+            onClose={() => setModalOpen(false)}
+            onSubmit={handleAddUser}
+          />
+        )}
       </main>
     </div>
   );
@@ -27,13 +50,11 @@ const Users = ({ users }: { users: UserProps[] }) => {
 
 export async function getStaticProps() {
   const res = await fetch("https://jsonplaceholder.typicode.com/users");
-  const users = await res.json();
+  const users: UserProps[] = await res.json();
 
   return {
-    props: {
-      users,
-    },
+    props: { users },
   };
 }
 
-export default Users;
+export default UsersPage;
